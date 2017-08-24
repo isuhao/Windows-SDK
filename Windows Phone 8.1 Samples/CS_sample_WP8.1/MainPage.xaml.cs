@@ -5,6 +5,7 @@ using Windows.UI.Xaml.Controls;
 using VungleSDK;
 using Windows.ApplicationModel.Core;
 using Windows.UI.Core;
+using Windows.UI.Xaml.Media.Animation;
 
 namespace CS_sample_WP8._1
 {
@@ -128,12 +129,15 @@ namespace CS_sample_WP8._1
         private async void PlayPlacement2_Click(Object sender, RoutedEventArgs e)
         {
             //Play ad for placement2
-            AdConfig adConfig = new AdConfig();
+            embeddedControl.AppID = appID;
+            embeddedControl.Placements = placement1 + "," + placement2 + "," + placement3;
+            embeddedControl.Placement = placement2;
+            embeddedControl.SoundEnabled = false;
 
-            adConfig.Orientation = DisplayOrientations.Portrait;
-            adConfig.SoundEnabled = false; // Default: true
+            embeddedControl.OnAdStart += Embedded_OnAdStart;
+            embeddedControl.OnAdEnd += Embedded_OnAdEnd;
 
-            await sdkInstance.PlayAdAsync(adConfig, placement2);
+            var nEmb = await embeddedControl.PlayAdAsync();
         }
 
         private async void PlayPlacement3_Click(Object sender, RoutedEventArgs e)
@@ -170,6 +174,40 @@ namespace CS_sample_WP8._1
             {
                 PlayPlacement3.IsEnabled = adPlayable;
             }
+        }
+
+        private void AnimateHeight(double value)
+        {
+            var anim = new DoubleAnimation()
+            {
+                From = embeddedControl.Height,
+                To = value,
+                Duration = TimeSpan.FromMilliseconds(500),
+                EnableDependentAnimation = true
+            };
+            Storyboard.SetTarget(anim, embeddedControl);
+            Storyboard.SetTargetProperty(anim, "Height");
+            var sb = new Storyboard();
+            sb.Children.Add(anim);
+            sb.Begin();
+        }
+
+        // Event Handler called before playing an ad
+        private void Embedded_OnAdStart(object sender, AdEventArgs e)
+        {
+            var nowait = this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+            {
+                AnimateHeight(200);
+            });
+        }
+
+        // Event handler called when the user leaves ad and control is return to the hosting app
+        private void Embedded_OnAdEnd(object sender, AdEndEventArgs e)
+        {
+            var nowait = this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+            {
+                AnimateHeight(1);
+            });
         }
     }
 }
