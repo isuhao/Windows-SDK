@@ -1,5 +1,10 @@
 ## Changelog
 
+### VERSION 5.1.0
+* Added Native Flex View and Flex Feed support
+* Added full support for Vungle MRAID
+* Enhanced Placements support
+
 ### VERSION 2.0.8
 * Launched new Placements feature
 
